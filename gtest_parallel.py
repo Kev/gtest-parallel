@@ -592,6 +592,7 @@ def find_tests(binaries, additional_args, options, times):
     command += additional_args + ['--gtest_color=' + options.gtest_color]
 
     test_group = ''
+    seen = []
     for line in test_list:
       if not line.strip():
         continue
@@ -608,6 +609,11 @@ def find_tests(binaries, additional_args, options, times):
       if not options.gtest_also_run_disabled_tests and 'DISABLED_' in test_name:
         continue
 
+      test_name = test_name.split('.')[0] + '.*'
+      if test_name in seen:
+        continue
+      seen.append(test_name)
+
       last_execution_time = times.get_test_time(test_binary, test_name)
       if options.failed and last_execution_time is not None:
         continue
@@ -620,6 +626,7 @@ def find_tests(binaries, additional_args, options, times):
                             options.output_dir))
 
       test_count += 1
+
 
   # Sort the tasks to run the slowest tests first, so that faster ones can be
   # finished in parallel.
